@@ -1,0 +1,9 @@
+{"id":"1","content":"Analyze the PHP bot functionality and create Flutter app requirements","status":"completed","priority":"high"}
+{"id":"2","content":"Design the Flutter app architecture and UI/UX","status":"completed","priority":"high"}
+{"id":"3","content":"Create project structure and main files","status":"completed","priority":"high"}
+{"id":"4","content":"Implement MyIdoom API integration (login, account details)","status":"completed","priority":"high"}
+{"id":"5","content":"Implement Algeria Telecom API integration (recharge, debt check)","status":"completed","priority":"high"}
+{"id":"6","content":"Implement OCR functionality for voucher scanning","status":"completed","priority":"medium"}
+{"id":"7","content":"Create UI screens (login, dashboard, recharge, account)","status":"completed","priority":"high"}
+{"id":"8","content":"Add state management and session handling","status":"completed","priority":"medium"}
+{"id":"9","content":"Test and validate all functionalities","status":"completed","priority":"medium"}
