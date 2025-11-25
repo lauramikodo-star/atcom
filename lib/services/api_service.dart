@@ -2,26 +2,34 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/user_session.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// Service class for handling API requests to Algeria Telecom and MyIdoom.
 class ApiService {
+  // Base URLs for the APIs.
   static const String myIdoomBaseUrl = 'https://myidoom.at.dz';
   static const String atBaseUrl = 'https://paiement.algerietelecom.dz/AndroidApp';
-  static const String geminiApiKey = 'AIzaSyAS6l7qi0RhVjzXR3u6sDdtNTHmESOQMzQ';
 
-  // MyIdoom API Headers
+  // API key for the Gemini OCR service.
+  final String geminiApiKey = dotenv.env['GEMINI_API_KEY']!;
+
+  // Headers for MyIdoom API requests.
   Map<String, String> get _myIdoomHeaders => {
     'Authorization': 'Basic dXNyLW15aWRvb206TmVpZEshMTc5NA==',
     'User-Agent': 'Dart/3.0 (dart:io)',
     'Content-Type': 'application/json',
   };
 
+  // Headers for Algeria Telecom API requests.
   Map<String, String> get _atHeaders => {
     'Authorization': 'Basic VEdkNzJyOTozUjcjd2FiRHNfSGpDNzg3IQ==',
     'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 10; vivo X21A Build/QD4A.200805.003)',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
   };
 
-  // MyIdoom Login
+  /// Logs in a user to MyIdoom.
+  ///
+  /// Returns a map containing the success status, token, and user data.
   Future<Map<String, dynamic>> myIdoomLogin(String phone, String password) async {
     try {
       final response = await http.post(
@@ -46,7 +54,7 @@ class ApiService {
         } else {
           return {
             'success': false,
-            'error': data['message'] ?? 'Login failed',
+            'error': data.containsKey('message') ? data['message'] : 'Login failed',
           };
         }
       } else {
@@ -63,7 +71,9 @@ class ApiService {
     }
   }
 
-  // Get Account Details
+  /// Gets the account details for the currently logged in user.
+  ///
+  /// Returns an [AccountDetails] object or `null` if the request fails.
   Future<AccountDetails?> getAccountDetails(String token) async {
     try {
       final response = await http.get(
@@ -85,7 +95,10 @@ class ApiService {
     }
   }
 
-  // Get Service Info (ADSL)
+  /// Gets the service info for a given phone number.
+  ///
+  /// This method first checks for ADSL service, then for 4G LTE service.
+  /// Returns a [ServiceInfo] object or `null` if the request fails.
   Future<ServiceInfo?> getServiceInfo(String phone) async {
     try {
       final response = await http.post(
@@ -116,7 +129,9 @@ class ApiService {
     }
   }
 
-  // Get Service Info (4G LTE)
+  /// Gets the service info for a given 4G LTE phone number.
+  ///
+  /// Returns a [ServiceInfo] object or `null` if the request fails.
   Future<ServiceInfo?> _getServiceInfo4G(String phone) async {
     try {
       final response = await http.post(
@@ -146,7 +161,9 @@ class ApiService {
     }
   }
 
-  // Check Debt
+  /// Checks the debt for a given phone number.
+  ///
+  /// Returns a string indicating the debt status.
   Future<String> checkDebt(String phone) async {
     try {
       final response = await http.post(
@@ -175,7 +192,9 @@ class ApiService {
     }
   }
 
-  // Recharge
+  /// Recharges a phone number with a voucher.
+  ///
+  /// Returns a [RechargeResult] object.
   Future<RechargeResult> recharge(String phone, String voucher) async {
     try {
       // Get service info first
@@ -208,7 +227,7 @@ class ApiService {
 
       return RechargeResult(
         success: isSuccess,
-        message: isSuccess ? "✅ RECHARGE SUCCESSFUL! 🚀" : "❌ RECHARGE FAILED ⚠️",
+        message: isSuccess ? "✅ RECHARGE SUCCESSFUL! 🚀" : data['erreur'] ?? "❌ RECHARGE FAILED ⚠️",
         response: data,
       );
     } catch (e) {
@@ -220,7 +239,9 @@ class ApiService {
     }
   }
 
-  // OCR with Gemini
+  /// Extracts a voucher code from an image using the Gemini OCR service.
+  ///
+  /// Returns the voucher code as a string, or an error message if the request fails.
   Future<String> extractVoucherCode(String imagePath) async {
     try {
       final imageBytes = await File(imagePath).readAsBytes();
@@ -259,7 +280,7 @@ class ApiService {
     }
   }
 
-  // Clean response from BOM characters
+  /// Cleans the response from BOM characters.
   String _cleanResponse(String response) {
     return response.replaceAll(RegExp(r'^[\xEF\xBB\xBF]+'), '').trim();
   }
