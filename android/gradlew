@@ -1,0 +1,186 @@
+#!/usr/bin/env sh
+
+#
+# Copyright 2015 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# @author...
+#
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD="maximum"
+
+warn () {
+    echo "$*"
+}
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+}
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+darwin=false
+nonstop=false
+case "`uname`" in
+  CYGWIN* )
+    cygwin=true
+    ;;
+  Darwin* )
+    darwin=true
+    ;;
+  NONSTOP* )
+    nonstop=true
+    ;;
+esac
+
+# For Cygwin, ensure paths are in UNIX format before anything is touched.
+if $cygwin ; then
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+fi
+
+# Attempt to set APP_HOME
+# Resolve links: $0 may be a link
+PRG="$0"
+# Need this for relative symlinks.
+while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`"/$link"
+    fi
+done
+
+APP_HOME=`dirname "$PRG"`
+
+# Absolutize APP_HOME
+# Keep in mind this fails if the path contains spaces
+APP_HOME=`cd "$APP_HOME" && pwd`
+
+# Add the '-showversion' option to the java command unless it's a nonstop jvm
+JVERSION_OPTION="-showversion"
+case "`uname`" in
+  NONSTOP* )
+    JVERSION_OPTION=""
+    ;;
+esac
+
+# Add the 'INIT_JAVA_TOOL_OPTIONS' option to prevent the internal java command from being affected by any environmental options.
+# See https://github.com/gradle/gradle/issues/15394
+INIT_JAVA_TOOL_OPTIONS_OPTION=""
+if [ -z "$JAVA_TOOL_OPTIONS" ]; then
+    INIT_JAVA_TOOL_OPTIONS_OPTION='-Dorg.gradle.internal.java.init.JAVA_TOOL_OPTIONS=_JETTY_DEFAULT_JAVA_OPTIONS__'
+fi
+
+# Locate the Wrapper Jar
+WRAPPER_JAR="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+# Read properties file, if it exists
+WRAPPER_PROPS="$APP_HOME/gradle/wrapper/gradle-wrapper.properties"
+if [ -f "$WRAPPER_PROPS" ]; then
+    while IFS= read -r line || [ -n "$line" ] ; do
+        case $line in
+            distributionUrl=*)
+                DISTRIBUTION_URL=${line#*=}
+                ;;
+        esac
+    done < "$WRAPPER_PROPS"
+fi
+
+# Check for a previously downloaded Gradle distribution
+if [ -n "$DISTRIBUTION_URL" ]; then
+    # Find the distribution file name, without extension
+    DISTRIBUTION_FILE_NAME=$(basename "${DISTRIBUTION_URL}" .zip)
+    # Check if the distribution has been downloaded already
+    if [ -d "$APP_HOME/gradle/wrapper/dists/$DISTRIBUTION_FILE_NAME" ]; then
+        GRADLE_HOME=$(find "$APP_HOME/gradle/wrapper/dists/$DISTRIBUTION_FILE_NAME" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+        if [ -d "$GRADLE_HOME" ]; then
+            export GRADLE_HOME
+        fi
+    fi
+fi
+
+# Set GRADLE_OPTS from the gradlew script.
+if [ -n "$DEFAULT_JVM_OPTS" ]; then
+    GRADLE_OPTS="$DEFAULT_JVM_OPTS"
+fi
+
+# For Cygwin, switch paths to Windows format before running java
+if $cygwin ; then
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
+    [ -n "$GRADLE_HOME" ] && GRADLE_HOME=`cygpath --windows "$GRADLE_HOME"`
+fi
+
+# If a gradlew file exists in the current directory, use it
+if [ -x "./gradlew" ]; then
+    ./gradlew "$@"
+    exit $?
+fi
+
+# Use the gradlew script from the project root if it exists
+if [ -x "../gradlew" ]; then
+    "../gradlew" "$@"
+    exit $?
+fi
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD="$JAVA_HOME/jre/sh/java"
+    else
+        JAVACMD="$JAVA_HOME/bin/java"
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD="java"
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Escape the arguments for the exec command
+ARGS=
+for arg in "$@"
+do
+    ARGS="$ARGS \"$arg\""
+done
+
+# Split up the JVM options only if the FULL_COMMAND variable is not set
+if [ -z "$FULL_COMMAND" ]; then
+    # Start the wrapper
+    exec "$JAVACMD" $JVERSION_OPTION $INIT_JAVA_TOOL_OPTIONS_OPTION $GRADLE_OPTS -jar "$WRAPPER_JAR" "$@"
+else
+    # Start the wrapper with the full command
+    exec "$JAVACMD" $JVERSION_OPTION $INIT_JAVA_TOOL_OPTIONS_OPTION $GRADLE_OPTS -jar "$WRAPPER_JAR" $FULL_COMMAND
+fi
